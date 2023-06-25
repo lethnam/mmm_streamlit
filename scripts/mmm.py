@@ -256,6 +256,7 @@ def run():
         n_time_periods=len(df_extra_test), budget=60, prices=[0.1, 0.11, 0.12], extra_features_opt=df_extra_test)
 
     logging.info('Saving')
+    os.chdir('./')
     os.makedirs('results', exist_ok=True)
     utils.save_model(mmm_model, 'results/model.pkl')
 

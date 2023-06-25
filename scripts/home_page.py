@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import os
 import streamlit as st
 from lightweight_mmm import utils
-from scripts.mmm import run as mmm_run
+from mmm import run as mmm_run
 
 
 class MMMStreamlit:
@@ -55,6 +55,10 @@ class MMMStreamlit:
         '''
         st.pyplot(self.mmm_model.fig_media_posteriors)
 
+    def media_effect_plots(self):
+        st.pyplot(self.mmm_model.fig_media_effects)
+        st.pyplot(self.mmm_model.fig_media_baseline_contribution)
+
 
 @st.cache_resource
 def load_mmm_model():
@@ -73,3 +77,6 @@ def load_mmm_model():
 # Init Streamlit class and plots
 st_obj = load_mmm_model()
 st_obj.show_data()
+st_obj.eda_plots()
+st_obj.posterior_plots()
+st_obj.media_effect_plots()
