@@ -5,9 +5,9 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import os
-import mmm
 import streamlit as st
 from lightweight_mmm import utils
+from scripts.mmm import run as mmm_run
 
 
 class MMMStreamlit:
@@ -56,13 +56,20 @@ class MMMStreamlit:
         st.pyplot(self.mmm_model.fig_media_posteriors)
 
 
-# Load MMM results. Run the model if there is no result file
-filepath = 'results/model.pkl'
-if os.path.isfile(filepath):
-    mmm_model = utils.load_model(filepath)
-else:
-    mmm_model = mmm.run()
+@st.cache_resource
+def load_mmm_model():
+    # Load MMM results. Run the model if there is no result file
+    os.chdir('./')
+    filepath = 'results/model.pkl'
+    if os.path.isfile(filepath):
+        mmm_model = utils.load_model(filepath)
+    else:
+        mmm_model = mmm_run()
+
+    st_obj = MMMStreamlit(mmm_model)
+    return st_obj
+
 
 # Init Streamlit class and plots
-st_obj = MMMStreamlit(mmm_model)
+st_obj = load_mmm_model()
 st_obj.show_data()
