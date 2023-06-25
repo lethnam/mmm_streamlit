@@ -23,7 +23,7 @@ class MMMStreamlit:
         self.df_media = self.mmm_model.media
         self.df_extra_features = self.mmm_model.extra_features
         self.df_data = pd.concat(
-            [self.df_target, self.df_media, self.df_extra_features], axis=0)
+            [self.df_target, self.df_media, self.df_extra_features], axis=1)
         self.media_vars = self.df_media.columns
 
     def show_data(self):
@@ -38,13 +38,22 @@ class MMMStreamlit:
         Plots EDA on train data
         '''
         st.header('EDA on train data')
+
         st.subheader('Correlation heatmap')
-        fig_heatmap, ax_heatmap = plt.subplot()
-        sns.heatmap(ax=ax_heatmap, data=self.df_data.corr())
+        fig_heatmap, ax_heatmap = plt.subplots()
+        sns.heatmap(ax=ax_heatmap, data=self.df_data.corr(),
+                    annot=True, fmt='.2f')
         st.pyplot(fig=fig_heatmap)
 
         st.subheader('Target vs. Media')
-        st.line_chart(data=self.df_data[['target']+self.media_vars])
+        st.line_chart(data=self.df_data['target'])
+        st.line_chart(data=self.df_data[list(self.media_vars)])
+
+    def posterior_plots(self):
+        '''
+        Display the posterior plots
+        '''
+        st.pyplot(self.mmm_model.fig_media_posteriors)
 
 
 # Load MMM results. Run the model if there is no result file
@@ -57,4 +66,3 @@ else:
 # Init Streamlit class and plots
 st_obj = MMMStreamlit(mmm_model)
 st_obj.show_data()
-st_obj.eda_plots()
