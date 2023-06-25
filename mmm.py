@@ -230,6 +230,12 @@ def run():
     '''
     Run the model
     '''
+    current_time = datetime.now()
+    os.makedirs('logs', exist_ok=True)
+    logging.basicConfig(
+        filename=f'logs/log_{current_time}.log', level=logging.INFO)
+
+    logging.info('Starting')
     logging.info('Generating dummy data')
     df_media, df_extra, df_target, df_costs = MMMBase.generate_test_data()
     df_media_train, df_media_test, df_target_train, df_target_test, df_extra_train, df_extra_test = \
@@ -249,20 +255,10 @@ def run():
     mmm_model.run_optimization(
         n_time_periods=len(df_extra_test), budget=60, prices=[0.1, 0.11, 0.12], extra_features_opt=df_extra_test)
 
-    return mmm_model
-
-
-if __name__ == "__main__":
-    current_time = datetime.now()
-    os.makedirs('logs', exist_ok=True)
-    logging.basicConfig(
-        filename=f'logs/log_{current_time}.log', level=logging.INFO)
-
-    logging.info('Starting')
-    mmm_model = run()
-
     logging.info('Saving')
     os.makedirs('results', exist_ok=True)
     utils.save_model(mmm_model, 'results/model.pkl')
 
     logging.info('Finished')
+
+    return mmm_model
