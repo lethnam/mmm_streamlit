@@ -1,5 +1,5 @@
 '''
-Visualize with streamlit
+Visualize MMM results with streamlit
 '''
 import pandas as pd
 import seaborn as sns
@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import os
 import streamlit as st
 from lightweight_mmm import utils
-from mmm import run as mmm_run
+from scripts.mmm import run as mmm_run
+st.set_page_config(layout='wide')
 
 
 class MMMStreamlit:
@@ -16,7 +17,9 @@ class MMMStreamlit:
     '''
 
     def __init__(self, mmm_model):
-        st.header('Loading MMM results ...')
+        placeholder = st.empty()
+        with placeholder.container():
+            st.subheader('Loading MMM results ...')
         self.mmm_model = mmm_model
 
         self.df_target = self.mmm_model.target
@@ -26,12 +29,15 @@ class MMMStreamlit:
             [self.df_target, self.df_media, self.df_extra_features], axis=1)
         self.media_vars = self.df_media.columns
 
+        placeholder.empty()
+        st.subheader('Loaded MMM data and results')
+
     def show_data(self):
         '''
-        Display train data
+        Display a view of the train data
         '''
-        st.header('Train data set')
-        st.dataframe(self.df_data.head(20))
+        st.subheader('Train data set')
+        st.dataframe(self.df_data.head(100))
 
     def eda_plots(self):
         '''
@@ -53,17 +59,41 @@ class MMMStreamlit:
         '''
         Display the posterior plots
         '''
-        st.pyplot(self.mmm_model.fig_media_posteriors)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader('Media Posteriors')
+            st.pyplot(self.mmm_model.fig_media_posteriors)
+        with col2:
+            st.subheader('Response Curves')
+            st.pyplot(self.mmm_model.fig_response_curves)
 
     def media_effect_plots(self):
-        st.pyplot(self.mmm_model.fig_media_effects)
+        '''
+        Display media effects, ROIs, and media contributions
+        '''
+        col1, col2 = st.columns(2)
+        with col1:
+            st.subheader('Media contribution')
+            st.pyplot(self.mmm_model.fig_media_effects)
+        with col2:
+            st.subheader('ROI')
+            st.pyplot(self.mmm_model.fig_roi)
+
+        st.subheader('Baseline media contribution')
         st.pyplot(self.mmm_model.fig_media_baseline_contribution)
+
+    def optimization_plots(self):
+        '''
+        Display pre-/post-optimization budget allocation
+        '''
+        st.header(
+            f'Optimal allocation on {self.mmm_model.opt_budget} extra budget')
+        st.pyplot(self.mmm_model.fig_pre_post_optim)
 
 
 @st.cache_resource
 def load_mmm_model():
     # Load MMM results. Run the model if there is no result file
-    os.chdir('./')
     filepath = 'results/model.pkl'
     if os.path.isfile(filepath):
         mmm_model = utils.load_model(filepath)
@@ -76,7 +106,8 @@ def load_mmm_model():
 
 # Init Streamlit class and plots
 st_obj = load_mmm_model()
+if 'st_obj' not in st.session_state:
+    st.session_state['st_obj'] = st_obj
+
+# Show a view on the train data
 st_obj.show_data()
-st_obj.eda_plots()
-st_obj.posterior_plots()
-st_obj.media_effect_plots()
