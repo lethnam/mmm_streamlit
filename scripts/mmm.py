@@ -1,9 +1,7 @@
 '''
 MMM model class
 '''
-import logging
 import os
-from datetime import datetime
 from typing import Optional, Union
 import pandas as pd
 import jax.numpy as jnp
@@ -17,7 +15,9 @@ class MMMBase:
     '''
 
     def __init__(self, target: pd.DataFrame = None, media: pd.DataFrame = None,
-                 extra_features: pd.DataFrame = None, costs: pd.DataFrame = None):
+                 extra_features: Optional[pd.DataFrame] = None, costs: pd.DataFrame = None,
+                 target_test: Optional[pd.DataFrame] = None, media_test: Optional[pd.DataFrame] = None,
+                 extra_features_test: Optional[pd.DataFrame] = None):
 
         # Check that input data are not missing
         if target is None or target.empty:
@@ -28,14 +28,14 @@ class MMMBase:
             raise ValueError('Missing costs')
 
         # Read data
-        self.target = target.copy()
-        self.media = media.copy()
-        self.costs = costs.copy()
+        self.target = target
+        self.media = media
+        self.costs = costs
+        self.extra_features = extra_features
 
-        if extra_features is not None and not extra_features.empty:
-            self.extra_features = extra_features.copy()
-        else:
-            self.extra_features = None
+        self.target_test = target_test
+        self.media_test = media_test
+        self.extra_features_test = extra_features_test
 
         self.media_vars = self.media.columns
         self.extra_vars = self.extra_features.columns
@@ -104,12 +104,12 @@ class MMMBase:
         '''
         data_size = len(target)
         split_point = int(data_size * train_perc)
-        media_data_train = media_data.iloc[:split_point, :].copy()
-        media_data_test = media_data.iloc[split_point:, :].copy()
-        target_train = target.iloc[:split_point].copy()
-        target_test = target.iloc[split_point:].copy()
-        extra_features_train = extra_features.iloc[:split_point, :].copy()
-        extra_features_test = extra_features.iloc[split_point:, :].copy()
+        media_data_train = media_data.iloc[:split_point, :]
+        media_data_test = media_data.iloc[split_point:, :]
+        target_train = target.iloc[:split_point]
+        target_test = target.iloc[split_point:]
+        extra_features_train = extra_features.iloc[:split_point, :]
+        extra_features_test = extra_features.iloc[split_point:, :]
 
         return media_data_train, media_data_test, target_train, target_test, extra_features_train, extra_features_test
 
@@ -224,42 +224,3 @@ class MMMBase:
                                                                                       'x'],
                                                                                   previous_budget_allocation=self.starting_allocation,
                                                                                   channel_names=self.media_vars)
-
-
-def run():
-    '''
-    Run the model
-    '''
-    current_time = datetime.now()
-    os.makedirs('logs', exist_ok=True)
-    logging.basicConfig(
-        filename=f'logs/log_{current_time}.log', level=logging.INFO)
-
-    logging.info('Starting')
-    logging.info('Generating dummy data')
-    df_media, df_extra, df_target, df_costs = MMMBase.generate_test_data()
-    df_media_train, df_media_test, df_target_train, df_target_test, df_extra_train, df_extra_test = \
-        MMMBase.train_test_split(
-            media_data=df_media, target=df_target, extra_features=df_extra, train_perc=0.9)
-
-    logging.info('Running model')
-    mmm_model = MMMBase(target=df_target_train, media=df_media_train,
-                        extra_features=df_extra_train, costs=df_costs)
-    mmm_model.set_custom_priors()
-    mmm_model.train(n_warmup=500, n_samples=500, n_chains=1)
-
-    mmm_model.get_diagnostics()
-    mmm_model.plot_media_effects()
-
-    logging.info('Running optimization')
-    mmm_model.run_optimization(
-        n_time_periods=len(df_extra_test), budget=60, prices=[0.1, 0.11, 0.12], extra_features_opt=df_extra_test)
-
-    logging.info('Saving')
-    os.chdir('./')
-    os.makedirs('results', exist_ok=True)
-    utils.save_model(mmm_model, 'results/model.pkl')
-
-    logging.info('Finished')
-
-    return mmm_model
