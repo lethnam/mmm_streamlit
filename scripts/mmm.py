@@ -2,11 +2,15 @@
 Base MMM model class
 '''
 from typing import Optional, Union
+from operator import attrgetter
 import pandas as pd
 import jax.numpy as jnp
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 from lightweight_mmm import lightweight_mmm
 from lightweight_mmm import utils, preprocessing, plot, optimize_media
-from scripts.utils import mcmc_diagnostics
+from numpyro.diagnostics import summary as numpyro_summary
 
 
 class MMMBase:
@@ -163,11 +167,33 @@ class MMMBase:
                            number_chains=n_chains,
                            custom_priors=self.custom_priors)
 
+    @staticmethod
+    def numpyro_mcmc_diagnostics(mcmc):
+        '''
+        Retrieve diagnostics from numpyro mcmc object
+        '''
+        divergence = np.sum(mcmc.get_extra_fields()[
+                            'diverging']) if 'diverging' in mcmc.get_extra_fields() else None
+        state_sample_field = attrgetter(mcmc._sample_field)(mcmc._last_state)
+        sample_summary = numpyro_summary(mcmc._states['z'])
+        n_eff = np.concatenate([sample_summary[i]['n_eff'].ravel()
+                                for i in state_sample_field])
+        r_hat = np.concatenate([sample_summary[i]['r_hat'].ravel()
+                                for i in state_sample_field])
+
+        fig_diag, axes = plt.subplots(1, 2, figsize=(15, 10))
+        sns.histplot(data=n_eff, ax=axes[0])
+        sns.histplot(data=r_hat, ax=axes[1])
+        axes[0].set_title('Effective sample sizes')
+        axes[1].set_title('r_hat')
+
+        return divergence, n_eff, r_hat, fig_diag
+
     def get_diagnostics(self):
         '''
         Plots for diagnostics
         '''
-        self._divergence, self._neff, self._rhat, self.fig_diagnostics = mcmc_diagnostics(
+        self._divergence, self._neff, self._rhat, self.fig_diagnostics = self.numpyro_mcmc_diagnostics(
             self.mmm_model._mcmc)
         self.fig_model_fit = plot.plot_model_fit(
             media_mix_model=self.mmm_model, target_scaler=self.target_scaler)
