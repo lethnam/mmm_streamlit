@@ -54,10 +54,10 @@ class MMMStreamlit:
         st.header('EDA on train data')
 
         st.subheader('Correlation heatmap')
-        fig_heatmap, ax_heatmap = plt.subplots()
+        fig_heatmap, ax_heatmap = plt.subplots(figsize=(10, 10))
         sns.heatmap(ax=ax_heatmap, data=self.df_data.corr(),
                     annot=True, fmt='.2f')
-        st.pyplot(fig=fig_heatmap)
+        st.pyplot(fig=fig_heatmap, use_container_width=True)
 
         st.subheader('Target vs. Media')
         st.line_chart(data=self.df_data['target'])
@@ -74,6 +74,21 @@ class MMMStreamlit:
         with col2:
             st.subheader('Response Curves')
             st.pyplot(self.mmm_model.fig_response_curves)
+
+    def show_diagnostics(self):
+        '''
+        Display posterior summary table, and model fit
+        '''
+        st.subheader('Summary')
+        st.write(
+            f"Divergence: {int(self.mmm_model._divergence) if self.mmm_model._divergence is not None else 'None'}")
+        st.pyplot(self.mmm_model.fig_diagnostics)
+
+        st.subheader('Model fit')
+        st.pyplot(self.mmm_model.fig_model_fit)
+
+        st.subheader('Priors vs. Posteriors')
+        st.pyplot(self.mmm_model.fig_priors_posteriors)
 
     def media_effect_plots(self):
         '''
@@ -94,6 +109,6 @@ class MMMStreamlit:
         '''
         Display pre-/post-optimization budget allocation
         '''
-        st.header(
-            f'Optimal allocation on {self.mmm_model.opt_budget} extra budget')
+        st.subheader(
+            f'Optimal allocation on a budget of {self.mmm_model.opt_budget}')
         st.pyplot(self.mmm_model.fig_pre_post_optim)

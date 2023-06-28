@@ -1,21 +1,21 @@
 '''
-MMM model class
+Base MMM model class
 '''
-import os
 from typing import Optional, Union
 import pandas as pd
 import jax.numpy as jnp
 from lightweight_mmm import lightweight_mmm
 from lightweight_mmm import utils, preprocessing, plot, optimize_media
+from scripts.utils import mcmc_diagnostics
 
 
 class MMMBase:
     '''
-    Base MMM class built upon LightweightMMM (https://github.com/google/lightweight_mmm)
+    Base MMM wrapper built around LightweightMMM (https://github.com/google/lightweight_mmm)
     '''
 
-    def __init__(self, target: pd.DataFrame = None, media: pd.DataFrame = None,
-                 extra_features: Optional[pd.DataFrame] = None, costs: pd.DataFrame = None,
+    def __init__(self, target: pd.DataFrame, media: pd.DataFrame, costs: pd.DataFrame,
+                 extra_features: Optional[pd.DataFrame] = None,
                  target_test: Optional[pd.DataFrame] = None, media_test: Optional[pd.DataFrame] = None,
                  extra_features_test: Optional[pd.DataFrame] = None):
 
@@ -62,6 +62,11 @@ class MMMBase:
         self.opt_extra_features = None
         self.optimal_solution = None
 
+        self._divergence = None
+        self._neff = None
+        self._rhat = None
+
+        self.fig_diagnostics = None
         self.fig_media_effects = None
         self.fig_media_posteriors = None
         self.fig_model_fit = None
@@ -162,6 +167,8 @@ class MMMBase:
         '''
         Plots for diagnostics
         '''
+        self._divergence, self._neff, self._rhat, self.fig_diagnostics = mcmc_diagnostics(
+            self.mmm_model._mcmc)
         self.fig_model_fit = plot.plot_model_fit(
             media_mix_model=self.mmm_model, target_scaler=self.target_scaler)
         self.fig_priors_posteriors = plot.plot_prior_and_posterior(
@@ -188,9 +195,9 @@ class MMMBase:
             metric=self.roi, channel_names=self.media_vars)
 
     def run_optimization(self,
-                         n_time_periods: int = None,
-                         budget: Union[float, int] = None,
-                         prices: list = None,
+                         n_time_periods: int,
+                         budget: Union[float, int],
+                         prices: list,
                          extra_features_opt: Optional[pd.DataFrame] = None):
         '''
         Run media optimization.
