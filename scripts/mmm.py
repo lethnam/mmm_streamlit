@@ -150,8 +150,8 @@ class MMMBase:
         Set up a dict of customer priors
         '''
         if priors is None:
-            priors = {"intercept": {'scale': 2}}
-        self.custom_priors = {**priors}
+            priors = {}
+        self.custom_priors = {**self.custom_priors, **priors}
 
     def train(self, n_warmup: int = 1000, n_samples: int = 1000, n_chains: int = 2):
         '''
