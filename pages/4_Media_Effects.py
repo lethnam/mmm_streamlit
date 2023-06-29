@@ -9,4 +9,4 @@ if 'st_obj' in st.session_state:
     st_obj.media_effect_plots()
 
 else:
-    st.subheader('No data found. Go to Home Page to load, or generate a demo')
+    st.info('No data found. Go to Home Page to load, or generate a demo')

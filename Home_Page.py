@@ -19,11 +19,11 @@ def cache_and_show(obj: MMMStreamlit = None):
         obj.show_data()
 
 
-if st.button('Generate a new demo model'):
+if st.button("Generate a new demo model (default Hill Adstock model with default LightweightMMM's priors)"):
     # Generate and cache the model
     mmm_model = generate_demo_model()
     st.session_state['mmm_model'] = mmm_model
-    st.write('A model has been generated')
+    st.info('A model has been generated')
     # Create and cache the Streamlit object
     st_obj = MMMStreamlit(mmm_model)
     cache_and_show(st_obj)
@@ -31,9 +31,8 @@ if st.button('Generate a new demo model'):
 
 if 'new_model_generated' in st.session_state and st.session_state['new_model_generated'] == 1 and st.button('Save trained demo model'):
     mmm_model = st.session_state['mmm_model']
-    st.subheader(type(mmm_model))
     save_model(mmm_model)
-    st.write('Model has been saved')
+    st.info('Model has been saved')
 
 if st.button('Load pre-trained demo model'):
     if os.path.isfile('results/model.pkl'):
@@ -41,4 +40,4 @@ if st.button('Load pre-trained demo model'):
         st_obj = MMMStreamlit(mmm_model)
         cache_and_show(st_obj)
     else:
-        st.write('No model is found. Please generate a demo model')
+        st.info('No model is found. Please generate a demo model')

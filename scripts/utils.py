@@ -26,7 +26,6 @@ def generate_demo_model(train_split_perc: float = 0.9):
                         costs=df_costs, extra_features=df_extra_train,
                         target_test=df_target_test, media_test=df_media_test,
                         extra_features_test=df_extra_test)
-    mmm_model.set_custom_priors()
     mmm_model.train(n_warmup=500, n_samples=500, n_chains=1)
 
     mmm_model.get_diagnostics()
