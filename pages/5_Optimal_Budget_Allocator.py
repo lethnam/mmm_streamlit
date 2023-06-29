@@ -7,10 +7,11 @@ if 'st_obj' in st.session_state:
     st_obj = st.session_state['st_obj']
 
     # Fields to insert budget and unit prices
-    budget = st.number_input('Insert a budget', key='opt_budget')
+    budget = st.number_input('Insert a budget', value=60, key='opt_budget')
     unit_prices = {}
     for i in st_obj.mmm_model.media_vars:
-        unit_prices[i] = st.number_input(f'Insert unit price of {i}')
+        unit_prices[i] = st.number_input(
+            f'Insert unit price of {i}', value=0.1)
     st.session_state['unit_prices'] = unit_prices
 
     # Run optimization and plots
