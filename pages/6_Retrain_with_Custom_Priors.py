@@ -22,12 +22,14 @@ if 'st_obj' in st.session_state:
                                                                    'rate': st.session_state['halfmax_rate']}}
             slope_priors = {'slope': {'concentration': st.session_state['slope_mean'],
                                       'rate': st.session_state['slope_rate']}}
-            st_obj.mmm_model.set_custom_priors(
+            mmm_model = st_obj.mmm_model
+            mmm_model.set_custom_priors(
                 {**halfmax_priors, **slope_priors})
-            st_obj.mmm_model.train(n_warmup=500, n_samples=500, n_chains=1)
-            st_obj.mmm_model.get_diagnostics()
-            st_obj.mmm_model.plot_media_effects()
+            mmm_model.train(n_warmup=500, n_samples=500, n_chains=1)
+            mmm_model.get_diagnostics()
+            mmm_model.plot_media_effects()
             # Cache
+            st_obj.mmm_model = mmm_model
             st.session_state['st_obj'] = st_obj
             st.info('The model is retrained. All pages are updated.')
 else:
