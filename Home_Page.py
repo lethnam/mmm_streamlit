@@ -19,6 +19,8 @@ def cache_and_show(obj: MMMStreamlit = None):
         obj.show_data()
 
 
+st.info("A webapp to run Marketing Mix Modeling experiments. See source: https://github.com/lethnam/mmm_streamlit")
+
 if st.button("Generate a new demo model (default Hill Adstock model with default LightweightMMM's priors)"):
     # Generate and cache the model
     mmm_model = generate_demo_model()
