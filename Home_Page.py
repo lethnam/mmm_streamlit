@@ -8,7 +8,7 @@ from scripts.utils import generate_demo_model, save_model
 st.set_page_config(page_title='MMM Streamlit Home Page', layout='wide')
 
 
-def cache_and_show(obj: MMMStreamlit = None):
+def cache_and_show(obj=None):
     '''
     Cache the object and display a view on the generated data
     '''
@@ -20,7 +20,7 @@ def cache_and_show(obj: MMMStreamlit = None):
 
 
 st.info("A webapp to run Marketing Mix Modeling experiments. See source: https://github.com/lethnam/mmm_streamlit")
-st.warning("LightweightMMM can be unstable. If it fails to re-generate a new model, please load the pre-trained one.")
+# st.warning("LightweightMMM can be unstable. If it fails to re-generate a new model, please load the pre-trained one.")
 
 if st.button("Generate a new demo model (default Hill Adstock model with default LightweightMMM's priors)"):
     # Generate and cache the model

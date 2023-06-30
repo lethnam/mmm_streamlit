@@ -150,7 +150,11 @@ class MMMBase:
         Set up a dict of customer priors
         '''
         if priors is None:
-            priors = {}
+            halfmax_priors = {'half_max_effective_concentration': {
+                'concentration': 1, 'rate': 1}}
+            slope_priors = {'slope': {'concentration': 1, 'rate': 1}}
+            priors = {**halfmax_priors, **slope_priors}
+
         self.custom_priors = {**self.custom_priors, **priors}
 
     def train(self, n_warmup: int = 1000, n_samples: int = 1000, n_chains: int = 2):
