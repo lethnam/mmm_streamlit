@@ -42,6 +42,7 @@ if st.button('Load pre-trained demo model'):
         mmm_model = MMMStreamlit.load_model('results/model.pkl')
         st_obj = MMMStreamlit(mmm_model)
         cache_and_show(st_obj)
-        del st.session_state['new_model_generated']
+        if 'new_model_generated' in st.session_state:
+            del st.session_state['new_model_generated']
     else:
         st.info('No model is found. Please generate a demo model')
