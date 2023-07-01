@@ -7,7 +7,7 @@ if 'st_obj' in st.session_state:
 
     # Set custom priors
     st.info("LightweightMMM's default priors for Hill function is Gamma(1, 1) (https://lightweight-mmm.readthedocs.io/en/latest/custom_priors.html)")
-    st.subheader('Set customer priors for the Hill function')
+    st.subheader('Set custom priors for the Hill function')
     st.write('Gamma dist priors for "half_max_effective_concentration"')
     st.number_input('mean', value=1,  key='halfmax_mean')
     st.number_input('rate', value=1, key='halfmax_rate')
